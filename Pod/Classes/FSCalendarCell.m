@@ -113,7 +113,7 @@
 {
     _backgroundLayer.hidden = NO;
     _backgroundLayer.path = [UIBezierPath bezierPathWithOvalInRect:_backgroundLayer.bounds].CGPath;
-    _backgroundLayer.fillColor = [self colorForCurrentStateInDictionary:_appearance.backgroundColors].CGColor;
+	_backgroundLayer.fillColor = [self colorForCurrentStateInDictionary:_appearance.backgroundColors].CGColor;
     CAAnimationGroup *group = [CAAnimationGroup animation];
     CABasicAnimation *zoomOut = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
     zoomOut.fromValue = @0.3;
@@ -145,9 +145,9 @@
     _titleLabel.text = [NSString stringWithFormat:@"%@",@(_date.fs_day)];
     _subtitleLabel.font = _appearance.subtitleFont;
     _subtitleLabel.text = _subtitle;
-    _titleLabel.textColor = [self colorForCurrentStateInDictionary:_appearance.titleColors];
+    _titleLabel.textColor = [self colorTitleForCurrentStateInDictionary:_appearance.titleColors];
     _subtitleLabel.textColor = [self colorForCurrentStateInDictionary:_appearance.subtitleColors];
-    _backgroundLayer.fillColor = [self colorForCurrentStateInDictionary:_appearance.backgroundColors].CGColor;
+	_backgroundLayer.fillColor = [self colorBackgroundForCurrentStateInDictionary:_appearance.backgroundColors].CGColor;
     
     CGFloat titleHeight = [_titleLabel.text sizeWithAttributes:@{NSFontAttributeName:self.titleLabel.font}].height;
     if (_subtitleLabel.text) {
@@ -167,7 +167,7 @@
         _titleLabel.frame = CGRectMake(0, 0, self.fs_width, floor(self.contentView.fs_height*5.0/6.0));
         _subtitleLabel.hidden = YES;
     }
-    _backgroundLayer.hidden = !self.selected && !self.isToday;
+	_backgroundLayer.hidden = NO;//!self.selected && !self.isToday;
     _backgroundLayer.path = _appearance.cellStyle == FSCalendarCellStyleCircle ?
     [UIBezierPath bezierPathWithOvalInRect:_backgroundLayer.bounds].CGPath :
     [UIBezierPath bezierPathWithRect:_backgroundLayer.bounds].CGPath;
@@ -214,6 +214,28 @@
         return dictionary[@(FSCalendarCellStateWeekend)];
     }
     return dictionary[@(FSCalendarCellStateNormal)];
+}
+
+- (UIColor *)colorBackgroundForCurrentStateInDictionary:(NSDictionary *)dictionary{
+	if (!self.isSelected && !self.isToday && !self.isPlaceholder && !(self.isWeekend && [[dictionary allKeys] containsObject:@(FSCalendarCellStateWeekend)])){
+		if (self.calendar.dataSource && [self.calendar.dataSource respondsToSelector:@selector(calendar:backgroundForDate:)]) {
+			return [self.calendar.dataSource calendar:self backgroundForDate:_date];
+		}
+	}
+	return [self colorForCurrentStateInDictionary:dictionary];
+}
+
+
+- (UIColor *)colorTitleForCurrentStateInDictionary:(NSDictionary *)dictionary{
+	if (!self.isSelected && !self.isToday && !self.isPlaceholder){
+		if (self.calendar.dataSource && [self.calendar.dataSource respondsToSelector:@selector(calendar:colorTitleForDate:)]) {
+			UIColor *color = [self.calendar.dataSource calendar:self colorTitleForDate:_date];
+			if (color){
+				return color;
+			}
+		}
+	}
+	return [self colorForCurrentStateInDictionary:dictionary];
 }
 
 - (FSCalendar *)calendar

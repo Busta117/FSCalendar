@@ -255,6 +255,7 @@
     cell.image = [self imageForDate:cell.date];
     cell.subtitle  = [self subtitleForDate:cell.date];
     cell.hasEvent = [self hasEventForDate:cell.date];
+	
     [cell setNeedsLayout];
     return cell;
 }
