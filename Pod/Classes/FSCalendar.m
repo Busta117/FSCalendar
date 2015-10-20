@@ -586,9 +586,12 @@
 
 - (void)didSelectDate:(NSDate *)date
 {
+    _selectedDate = [NSDate date].fs_dateByIgnoringTimeComponents;
+    
     if (_delegate && [_delegate respondsToSelector:@selector(calendar:didSelectDate:)]) {
         [_delegate calendar:self didSelectDate:date];
     }
+    [self layoutIfNeeded];
 }
 
 - (void)currentMonthDidChange
